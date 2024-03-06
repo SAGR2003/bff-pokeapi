@@ -1,41 +1,29 @@
 const express = require('express');
 const app = express();
 const axios = require('axios');
-const cors = require('cors'); 
+const cors = require('cors');
 const PORT = 3001;
 
 app.use(express.json());
 app.use(cors());
+app.post('/get-pokemon', async (req, res) => {
+  const { pokemonName } = req.body;
 
-app.post('/new-account', async (req, res) => {
-  const { user, type, documentNum, password } = req.body;
-  
   try {
-    const response = await axios.post('http://localhost:8081/accounts', {
-        userName: user,
-        AccountType: type,
-        documentNumber: documentNum,
-        password: password 
-    });
-    res.json({ msg: 'Nueva cuenta creada con éxito' });
+    const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+    const pokemonData = response.data;
+
+    res.json(pokemonData);
   } catch (error) {
-    console.error('Error al crear la cuenta en el servicio del banco:', error);
-    res.status(500).json({ error: 'Error al crear la cuenta en el servicio del banco' });
+    console.error('Error fetching Pokemon data from PokeAPI:', error);
+
+    if (error.response && error.response.status) {
+      res.status(error.response.status).json({ error: `Error from PokeAPI: ${error.response.statusText}` });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
   }
 });
-
-app.post('/get-account', async (req, res) => {
-  const { documentNum, password } = req.body;
-  console.log(documentNum)
-  try {
-    const response = await axios.get('http://localhost:8081/accounts/' + documentNum);
-    res.json({ msg: 'La cuenta existe' });
-  } catch (error) {
-    console.error('Error al encontrar la cuenta en el servicio del banco:', error);
-    res.status(500).json({ error: 'Error al encontrar la cuenta en el servicio del banco' });
-  }
-});
-
 app.listen(PORT, () => {
-  console.log(`BFF on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });

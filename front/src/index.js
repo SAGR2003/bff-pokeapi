@@ -1,26 +1,45 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import Login from './components/log-in';
-import SignUp from './components/sign-up';
-import './index.css';
-import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import React, { useState } from 'react';
+import axios from 'axios';
+import { createRoot } from 'react-dom/client';
 
-const router = createBrowserRouter([
-    {
-        path: "/log-in",
-        element: <Login/>,
-        errorElement: <h1>404</h1>,
-    },
-    {
-        path: "/sign-up",
-        element: <SignUp/>,
-        errorElement: <h1>404</h1>,
-    },
-]);
+const rootContainer = document.getElementById('root');
+const root = createRoot(rootContainer);
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const GetPokemonAbility = () => {
+    const [pokemonName, setPokemonName] = useState('');
+    const [pokemonData, setPokemonData] = useState(null);
+    const [error, setError] = useState(null);
+
+    const handleGetPokemonAbility = async () => {
+        try {
+            const response = await axios.post('http://localhost:3001/get-pokemon', { pokemonName });
+            const pokemonData = response.data;
+            setPokemonData(pokemonData);
+        } catch (error) {
+            console.error('Error fetching Pokemon ability data:', error);
+            setError('Error fetching Pokemon ability data. Please try again.');
+        }
+    };
+
+    return (
+        <div>
+            <input type="text" value={pokemonName} onChange={e => setPokemonName(e.target.value)} />
+            <button onClick={handleGetPokemonAbility}>Get Pokemon Ability</button>
+            {error && <p>{error}</p>}
+            {pokemonData && (
+                <div>
+                    <h2>{pokemonData.name}</h2>
+                    <img src={pokemonData.sprites.front_default} alt={pokemonData.name} />
+                    <p>Experience: {pokemonData.base_experience}</p>
+                    <p>Height: {pokemonData.height}</p>
+                    <p>Weight: {pokemonData.weight}</p>
+                </div>
+            )}
+        </div>
+    );
+};
 root.render(
     <React.StrictMode>
-        <RouterProvider router={router}/>
+        <GetPokemonAbility />
     </React.StrictMode>
 );
