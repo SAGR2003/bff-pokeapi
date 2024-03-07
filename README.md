@@ -64,5 +64,5 @@ docker run -p 3001:3001 bff-dev
 
 ## Diagrams
 ### Component diagram:
-![App Screenshot](docu\Componnetes.png)
+![App Screenshot](docu/Componnetes.png)
 
